@@ -5,23 +5,24 @@
     <h3>Create New Listing</h3>
     <form method="POST" action="/listings" novalidate class="needs-validation">
         <div class="mb-3">
-        <label for="title" class="form-label">Title</label>
-        <input
-        name="listing[title]"
-        placeholder="Add a catchy title" 
-        type="text" 
-        class="form-control" 
-        required />
-        <div class="valid-feedback">Title Looks good!</div>
+            <label for="title" class="form-label">Title</label>
+            <input
+            name="listing[title]"
+            placeholder="Add a catchy title" 
+            type="text" 
+            class="form-control" 
+            required 
+            />
+           <div class="valid-feedback">Title Looks good!</div>
         </div>
 
         <div class="mb-3">
-        <label for="description" class="form-label">Description</label>    
-        <textarea
-        name="listing[description]" 
-        class="form-control"
-        required></textarea>
-        <div class="invalid-feedback">Please enter a short description</div>
+            <label for="description" class="form-label">Description</label>    
+            <textarea
+            name="listing[description]" 
+            class="form-control"
+            required></textarea>
+            <div class="invalid-feedback">Please enter a short description</div>
         </div>
 
         <div class="mb-3">
