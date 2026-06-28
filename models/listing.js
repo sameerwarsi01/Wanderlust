@@ -11,7 +11,7 @@ const listingSchema = new Schema({
 
     description: String,
 
-    image: {
+     image: {
         url: {
             type: String,
             default: "https://www.tourmyindia.com/states/goa/image/beaches-goa.webp",
@@ -36,6 +36,11 @@ const listingSchema = new Schema({
             ref: "Review",
         },
     ],
+
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    }
 });
 
 listingSchema.post("findOneAndDelete", async(listing) => {
