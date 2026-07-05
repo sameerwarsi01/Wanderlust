@@ -10,23 +10,10 @@ const listingSchema = new Schema({
     },
 
     description: String,
-
      image: {
-        url: {
-            type: String,
-            default: "https://www.tourmyindia.com/states/goa/image/beaches-goa.webp",
-            set: (v) =>
-                v === ""
-                ? "https://www.tourmyindia.com/states/goa/image/beaches-goa.webp"
-                : v,
-        },
-
-        filename: {
-            type: String,
-            default: "listingimage",
-        },
+        url: String,
+        filename: String,
     },
-
     price: Number,
     location: String,
     country: String,
