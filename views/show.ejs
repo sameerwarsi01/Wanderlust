@@ -78,9 +78,19 @@
       </div>
       <button class="btn btn-outline-dark">Submit</button>
     </form>
-    <hr>
     <% } %>
+    <hr>
+         <h3>Where you'll be</h3>
 
+            <div id="map"></div>
+
+            <style>
+                #map{
+                    height:400px;
+                    width:100%;
+                    margin-top: 20px;
+                }
+            </style> 
     <p><b>All Reviews</b></p>
     <div class="row">
 
@@ -103,6 +113,9 @@
         </div>
       <% } %> 
     </div>
-
   </div>
 </div>
+<script>
+    window.coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
+    window.listingTitle = "<%= listing.title %>";
+</script>
