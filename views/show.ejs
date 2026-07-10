@@ -80,42 +80,39 @@
     </form>
     <% } %>
     <hr>
-         <h3>Where you'll be</h3>
-
-            <div id="map"></div>
-
-            <style>
-                #map{
-                    height:400px;
-                    width:100%;
-                    margin-top: 20px;
-                }
-            </style> 
     <p><b>All Reviews</b></p>
-    <div class="row">
+<div class="row">
+  <% for(review of listing.reviews) { %>
+    <div class="card col-5 ms-3 mb-3">
+      <div class="card-body">
+        <h5 class="card-title">@<%= review.author.username %></h5>
+        <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
+        <p class="card-text"><%= review.comment %></p>
 
-    <% for(review of listing.reviews) { %>
-        <div class="card col-5 ms-3 mb-3">
-          <div class="card-body">
-            <h5 class="card-title">@<%= review.author.username %></h5>
-            <p class="starability-result card-text" 
-            data-rating="<%= review.rating %>"
-            ></p>
-            <p class="card-text"><%= review.comment %></p>
-            <form 
-              class="mb-3" 
-               method="POST" 
-               action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" 
-              >
-              <button class="btn btn-sm btn-dark">Delete</button>
-          </form>
-          </div>
-        </div>
-      <% } %> 
+        <form
+          class="mb-3"
+          method="POST"
+          action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+        >
+          <button class="btn btn-sm btn-dark">Delete</button>
+        </form>
+      </div>
     </div>
-  </div>
+  <% } %>
 </div>
+<h3>Where you'll be</h3>
+
+<div id="map"></div>
+
+<style>
+  #map {
+    height: 400px;
+    width: 100%;
+    margin-top: 20px;
+  }
+</style>
+
 <script>
-    window.coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
-    window.listingTitle = "<%= listing.title %>";
+  window.coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
+  window.listingTitle = "<%= listing.title %>";
 </script>
