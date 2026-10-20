@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Review = require("./review.js");
-const review = require("./review.js");
 
 const listingSchema = new Schema({
     title: {
@@ -34,6 +33,24 @@ const listingSchema = new Schema({
         enum: ["Point"],
         default: "Point",
     },
+
+    category: {
+        type: String, 
+        enum: [
+            "Trending",
+            "Rooms",
+            "Iconic Cities",
+            "Mountain",
+            "Castles",
+            "Amazing Pools",
+            "Camping",
+            "Farms",
+            "Arctic",
+            "Domes",
+            "Boats",
+        ],
+    },
+    
     coordinates: {
         type: [Number],
     },

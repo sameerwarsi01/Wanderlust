@@ -2,9 +2,31 @@ const Listing = require("../models/listing.js");
 const axios = require("axios");
 
 module.exports.index = async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("index.ejs", { allListings });
-}
+  const { category, q } = req.query;
+  let allListings;
+
+  if (category) {
+    allListings = await Listing.find({ category: category });
+  } else if (q && q.trim() !== "") {
+    let searchQuery = q.trim();
+    allListings = await Listing.find({
+      $or: [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { location: { $regex: searchQuery, $options: "i" } },
+        { country: { $regex: searchQuery, $options: "i" } },
+      ],
+    });
+
+    if (allListings.length === 0) {
+      req.flash("error", "No listings found matching your search!");
+      return res.redirect("/listings");
+    }
+  } else {
+    allListings = await Listing.find({});
+  }
+
+  res.render("index.ejs", { allListings, selectedCategory: category });
+}; 
 
 module.exports.renderNewForm = (req, res) => {
     res.render("new.ejs");
