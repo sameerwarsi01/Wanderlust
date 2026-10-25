@@ -23,6 +23,7 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const bookingRouter = require("./routes/booking.js");
+const wishlistRouter = require("./routes/wishlist.js");
 
 //const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const dbUrl = process.env.ATLASDB_URL;
@@ -101,15 +102,26 @@ app.get("/", (req, res) => {
 });
 app.use("/", userRouter);
 app.use("/", bookingRouter);
+app.use("/wishlist", wishlistRouter);
 
-app.all("/{*splat}", (req, res, next) => {
+// Favicon ka 404 ignore karne ke liye
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+app.use((req, res, next) => {
     next(new ExpressError(404, "Page Not Found!"));
 });
 
-app.use((err, req, res, next) =>{
+app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
+
+    if (statusCode !== 404) {
+        console.log("EXACT ERROR:", err);
+    }
+
+    if (req.xhr || req.headers.accept?.includes("json") || req.path.startsWith("/wishlist")) {
+        return res.status(statusCode).json({ success: false, message });
+    }
     res.status(statusCode).render("error.ejs", { message });
-    //res.status(statusCode).send(message);
 });
 
 app.listen(8080, () => {

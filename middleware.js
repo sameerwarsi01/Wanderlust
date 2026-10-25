@@ -6,12 +6,15 @@ const { listingSchema, reviewSchema } = require("./schema.js");
 
 module.exports.isLoggedIn = (req, res, next) => {
     if(!req.isAuthenticated()){
+        if (req.xhr || req.headers.accept?.includes("json")) {
+            return res.status(401).json({ success: false, message: "Please login first!" });
+        }
         req.session.redirectUrl = req.originalUrl;
-        req.flash("error", "You must be logged in to create listing!");
+        req.flash("error", "You must be logged in!");
         return res.redirect("/login");
     }
     next();
-}
+};
 
 module.exports.saveRedirectUrl = (req, res, next) => {
     if(req.session.redirectUrl){

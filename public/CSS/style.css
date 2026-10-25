@@ -209,3 +209,31 @@ body {
         width: 100%;
     }
 }
+
+.wishlist-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1.75rem;
+  z-index: 10;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+}
+
+.wishlist-btn i {
+  font-size: 1.5rem;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  transition: transform 0.2s ease, color 0.2s ease;
+  pointer-events: none;
+}
+
+.wishlist-btn i:hover {
+  transform: scale(1.15);
+}
+
+.wishlist-btn i.active {
+  color: #fe424d !important;
+}
