@@ -1,5 +1,6 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="/css/Booking.css" />
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <div class="row mt-3">
   <!-- Title -->
@@ -120,15 +121,15 @@
             <h4><b>&#8377; <%= (listing.price || 0).toLocaleString("en-IN") %></b> <span class="fs-6 text-muted font-monospace">/ night</span></h4>
           </div>
 
-          <form action="/listings/<%= listing._id %>/bookings" method="POST" class="needs-validation" novalidate>
+          <form id="bookingForm" class="needs-validation" novalidate>
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label for="checkIn" class="form-label small fw-semibold">CHECK-IN</label>
-                <input type="date" class="form-control" id="checkIn" name="booking[checkIn]" required />
+                <input type="date" class="form-control" id="checkIn" name="checkIn" required />
               </div>
               <div class="col-6">
                 <label for="checkOut" class="form-label small fw-semibold">CHECKOUT</label>
-                <input type="date" class="form-control" id="checkOut" name="booking[checkOut]" required />
+                <input type="date" class="form-control" id="checkOut" name="checkOut" required />
               </div>
             </div>
 
@@ -148,10 +149,8 @@
               </div>
             </div>
 
-            <input type="hidden" name="booking[totalPrice]" id="totalPriceInput" value="0" />
-
             <% if(currUser) { %>
-              <button class="btn btn-danger w-100 py-2 fs-6 fw-bold" id="reserveBtn" disabled>Reserve</button>
+              <button type="submit" class="btn btn-danger w-100 py-2 fs-6 fw-bold" id="reserveBtn" disabled>Reserve & Pay</button>
             <% } else { %>
               <a href="/login" class="btn btn-outline-danger w-100 py-2">Log in to Reserve</a>
             <% } %>
@@ -163,6 +162,7 @@
 </div>
 
 <script>
+  window.listingId = "<%= listing._id %>";
   window.listingPrice = Number("<%= listing.price || 0 %>");
   window.listingTitle = "<%= listing.title %>";
   window.coordinates = JSON.parse('<%- JSON.stringify((listing.geometry && listing.geometry.coordinates) ? listing.geometry.coordinates : [77.2090, 28.6139]) %>');

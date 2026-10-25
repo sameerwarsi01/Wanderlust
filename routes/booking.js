@@ -1,27 +1,14 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
-const wrapasync = require("../utils/wrapAsync");
+const wrapAsync = require("../utils/wrapAsync");
 const { isLoggedIn } = require("../middleware");
+
 const bookingController = require("../controllers/bookings");
+const paymentController = require("../controllers/payments");
 
-// Create Booking for listing
-router.post(
-    "/listings/:id/bookings",
-    isLoggedIn,
-    wrapasync(bookingController.createBooking)
-); 
-
-// View user's bookings
-router.get(
-    "/bookings",
-    wrapasync(bookingController.index)
-);
-
-// Cancel booking
-router.delete(
-    "/bookings/:bookingId",
-    isLoggedIn,
-    wrapasync(bookingController.destroyBooking)
-);
+router.post("/listings/:id/create-order", isLoggedIn, wrapAsync(paymentController.createOrder));
+router.post("/listings/:id/verify", isLoggedIn, wrapAsync(paymentController.verifyPayment));
+router.get("/bookings", isLoggedIn, wrapAsync(bookingController.index));
+router.delete("/bookings/:bookingId", isLoggedIn, wrapAsync(bookingController.destroyBooking));
 
 module.exports = router;

@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalPriceDisplay = document.getElementById("totalPriceDisplay");
   const totalPriceInput = document.getElementById("totalPriceInput");
   const reserveBtn = document.getElementById("reserveBtn");
+  const bookingForm = document.getElementById("bookingForm");
 
   if (!checkInInput || !checkOutInput) return;
 
@@ -31,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
       basePriceSpan.innerText = base.toLocaleString("en-IN");
       taxPriceSpan.innerText = tax.toLocaleString("en-IN");
       totalPriceDisplay.innerText = total.toLocaleString("en-IN");
-      totalPriceInput.value = total;
+      if (totalPriceInput) totalPriceInput.value = total;
 
       priceBox.classList.remove("d-none");
       if (reserveBtn) reserveBtn.disabled = false;
@@ -46,4 +47,73 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateBill();
   });
   checkOutInput.addEventListener("change", calculateBill);
+
+  if (bookingForm) {
+    bookingForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const checkIn = checkInInput.value;
+      const checkOut = checkOutInput.value;
+
+      if (!checkIn || !checkOut) {
+        alert("Please select valid check-in and checkout dates.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/listings/${window.listingId}/create-order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ checkIn, checkOut }),
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          alert(data.message || "Failed to create order");
+          return;
+        }
+
+        const options = {
+          key: data.keyId,
+          amount: data.order.amount,
+          currency: data.order.currency,
+          name: data.appName,
+          description: `Reservation for ${data.listingTitle}`,
+          order_id: data.order.id,
+          handler: async function (response) {
+            const verifyRes = await fetch(`/listings/${window.listingId}/verify`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                totalPrice: data.finalAmount,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.redirectUrl) {
+              window.location.href = verifyData.redirectUrl;
+            }
+          },
+          prefill: {
+            name: data.user.name,
+            email: data.user.email,
+          },
+          theme: {
+            color: data.themeColor,
+          },
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error("Payment error:", err);
+        alert("Payment initialization failed. Please try again.");
+      }
+    });
+  }
 });
