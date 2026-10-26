@@ -1,0 +1,128 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4 mb-5">
+    <div class="row bg-white rounded-4 shadow-sm border overflow-hidden" style="min-height: 72vh;">
+        
+        <!-- Left Sidebar: Conversations List -->
+        <div class="col-md-4 border-end p-0 d-flex flex-column">
+            <div class="p-3 border-bottom bg-light">
+                <h5 class="fw-bold mb-0"><i class="fa-regular fa-comments me-2 text-danger"></i>Messages</h5>
+            </div>
+            <div class="overflow-auto flex-grow-1" style="max-height: 65vh;">
+                <% if (typeof conversations !== 'undefined' && conversations && conversations.length > 0) { %>
+                    <div class="list-group list-group-flush" id="conversationsList">
+                        <% for (let conv of conversations) { 
+                            let currentUserId = (typeof currUser !== 'undefined' && currUser && currUser._id) ? currUser._id.toString() : '';
+                            let otherUser = conv.participants ? conv.participants.find(p => p && p._id.toString() !== currentUserId) : null;
+                            let isSelected = (typeof activeChat !== 'undefined' && activeChat && activeChat._id.toString() === conv._id.toString());
+                        %>
+                            <!-- FIX: Listing ID ki jagah Conversation ID se link banaya taaki Host ko error na aaye -->
+                            <a href="/chat/c/<%= conv._id %>" 
+                               id="conv-tab-<%= conv._id %>"
+                               class="list-group-item list-group-item-action p-3 <%= isSelected ? 'bg-light border-start border-danger border-4' : '' %>">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-1 fw-bold text-truncate"><%= otherUser ? otherUser.username : 'User' %></h6>
+                                    <small class="text-muted conv-time"><%= new Date(conv.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></small>
+                                </div>
+                                <p class="mb-1 text-muted small text-truncate">
+                                    <i class="fa-solid fa-house-chimney text-secondary me-1"></i><%= conv.listing ? conv.listing.title : 'Listing' %>
+                                </p>
+                                <small class="text-secondary text-truncate d-block conv-last-msg">
+                                    <%= (conv.messages && conv.messages.length > 0) ? conv.messages[conv.messages.length - 1].text : 'No messages yet' %>
+                                </small>
+                            </a>
+                        <% } %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center p-4 text-muted">
+                        <i class="fa-regular fa-message fa-2x mb-2 text-secondary"></i>
+                        <p class="small mb-0">No active conversations yet.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Right Side: Active Chat Window -->
+        <div class="col-md-8 p-0 d-flex flex-column">
+            <% if (typeof activeChat !== 'undefined' && activeChat) { 
+                let myId = (typeof currUser !== 'undefined' && currUser && currUser._id) ? currUser._id.toString() : '';
+                let chatPartner = activeChat.participants ? activeChat.participants.find(p => p && p._id.toString() !== myId) : null;
+            %>
+                <!-- Chat Header -->
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                    <div>
+                        <h6 class="mb-0 fw-bold"><%= chatPartner ? chatPartner.username : 'User' %></h6>
+                        <small class="text-muted"><%= activeChat.listing ? activeChat.listing.title : 'Listing Chat' %></small>
+                    </div>
+                    <% if (activeChat.listing) { %>
+                        <a href="/listings/<%= activeChat.listing._id %>" class="btn btn-sm btn-outline-danger">View Stay</a>
+                    <% } %>
+                </div>
+
+                <!-- Messages List Box -->
+                <div class="flex-grow-1 p-3 overflow-auto d-flex flex-column gap-2" id="chatBox" style="max-height: 55vh; background-color: #f8f9fa;">
+                    <% if (activeChat.messages && activeChat.messages.length > 0) { %>
+                        <% for (let msg of activeChat.messages) { 
+                            let msgSenderId = "";
+                            if (msg.sender) {
+                                msgSenderId = msg.sender._id ? msg.sender._id.toString() : msg.sender.toString();
+                            }
+                            let isMe = (myId !== "" && msgSenderId === myId);
+                        %>
+                            <div class="d-flex flex-column <%= isMe ? 'align-items-end' : 'align-items-start' %>">
+                                <div class="px-3 py-2 rounded-4 <%= isMe ? 'bg-danger text-white' : 'bg-white text-dark border' %>" 
+                                     style="max-width: 75%; word-break: break-word;">
+                                    <%= msg.text %>
+                                </div>
+                                <small class="text-muted px-1" style="font-size: 0.7rem;">
+                                    <%= new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                                </small>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="text-center m-auto text-muted empty-chat-placeholder">
+                            <i class="fa-solid fa-hand-sparkles fa-2x text-warning mb-2"></i>
+                            <p class="small mb-0">Say hello to start the conversation!</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Send Message Input Bar -->
+                <div class="p-3 border-top bg-white">
+                    <form id="chatForm" action="/chat/message/send/<%= activeChat._id %>" method="POST" class="d-flex gap-2">
+                        <input 
+                            type="text" 
+                            id="chatInput"
+                            name="text" 
+                            class="form-control rounded-pill" 
+                            placeholder="Type your message..." 
+                            required 
+                            autocomplete="off"
+                        >
+                        <button type="submit" id="sendBtn" class="btn btn-danger rounded-circle px-3">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Hidden context for external chat.js -->
+                <div id="chatContext" 
+                     data-conversation-id="<%= activeChat._id %>" 
+                     data-current-user-id="<%= currUser ? currUser._id.toString() : '' %>"
+                     class="d-none">
+                </div>
+            <% } else { %>
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted p-5">
+                    <i class="fa-solid fa-comments fa-3x text-secondary mb-3"></i>
+                    <h5>Select a conversation</h5>
+                    <p class="small">Choose a chat from the left side to continue messaging.</p>
+                </div>
+            <% } %>
+        </div>
+
+    </div>
+</div>
+
+<!-- Linked External Scripts -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/chat.js"></script>

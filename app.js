@@ -1,9 +1,14 @@
-if(process.env.NODE_ENV != "production"){
+if (process.env.NODE_ENV != "production") {
     require('dotenv').config();
 }
 
 const express = require("express");
 const app = express();
+const http = require("http");
+const { Server } = require("socket.io");
+const server = http.createServer(app);
+const io = new Server(server);
+
 const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
@@ -18,14 +23,13 @@ const User = require("./models/user.js");
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const bookingRouter = require("./routes/booking.js");
 const wishlistRouter = require("./routes/wishlist.js");
+const chatRouter = require("./routes/chat.js");
 
-//const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const dbUrl = process.env.ATLASDB_URL;
 
 main()
@@ -37,17 +41,16 @@ main()
   });
 
 async function main() {
-    await mongoose.connect(dbUrl)
+    await mongoose.connect(dbUrl);
 }
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
-
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -57,12 +60,12 @@ const store = MongoStore.create({
     touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
-    console.log("ERROR is MONGO SESSION STORE", err);
+store.on("error", (err) => {
+    console.log("ERROR in MONGO SESSION STORE", err);
 });
 
 const sessionOptions = {
-store,
+    store,
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
@@ -72,11 +75,6 @@ store,
         httpOnly: true,
     },
 };
-
-//app.get("/", (req, res) => {
-    //res.send("I am root");
-//});
-
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -95,6 +93,7 @@ app.use((req, res, next) => {
     next();
 });
 
+// App Routes
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.get("/", (req, res) => {
@@ -103,14 +102,26 @@ app.get("/", (req, res) => {
 app.use("/", userRouter);
 app.use("/", bookingRouter);
 app.use("/wishlist", wishlistRouter);
+app.use("/chat", chatRouter);
 
-// Favicon ka 404 ignore karne ke liye
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
+io.on("connection", (socket) => {
+    socket.on("join-chat", (conversationId) => {
+        socket.join(String(conversationId));
+    });
+
+    socket.on("send-message", (data) => {
+        io.to(String(data.conversationId)).emit("receive-message", data);
+    });
+});
+
+// 404 Handler
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page Not Found!"));
 });
 
+// Global Error Handler
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
 
@@ -124,6 +135,6 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { message });
 });
 
-app.listen(8080, () => {
+server.listen(8080, () => {
     console.log("server is listening on port 8080");
 });

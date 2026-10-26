@@ -116,7 +116,7 @@
 
       <!-- Right Column: Booking Card -->
       <div class="col-12 col-lg-5">
-        <div class="booking-card">
+        <div class="booking-card shadow-sm p-4 rounded-4 border">
           <div class="d-flex justify-content-between align-items-baseline mb-3">
             <h4><b>&#8377; <%= (listing.price || 0).toLocaleString("en-IN") %></b> <span class="fs-6 text-muted font-monospace">/ night</span></h4>
           </div>
@@ -155,6 +155,13 @@
               <a href="/login" class="btn btn-outline-danger w-100 py-2">Log in to Reserve</a>
             <% } %>
           </form>
+
+          <!-- Contact Host Button (Yahan Add Hua Hai) -->
+          <% if(currUser && listing.owner && !listing.owner._id.equals(currUser._id)) { %>
+            <a href="/chat/<%= listing._id %>" class="btn btn-outline-dark mt-3 w-100 py-2">
+              <i class="fa-regular fa-message me-2"></i>Contact Host
+            </a>
+          <% } %>
         </div>
       </div>
     </div>
