@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Review = require("./review.js");
 
+const imageSchema = new Schema({
+    url: String,
+    filename: String,
+});
+
 const listingSchema = new Schema({
     title: {
         type: String,
@@ -9,13 +14,20 @@ const listingSchema = new Schema({
     },
 
     description: String,
-     image: {
+    images: [imageSchema],
+
+    image: {
         url: String,
         filename: String,
     },
+    
     price: Number,
     location: String,
     country: String,
+    category: {
+        type: String,
+        required: true,
+    },
     reviews: [
         {
             type: Schema.Types.ObjectId,

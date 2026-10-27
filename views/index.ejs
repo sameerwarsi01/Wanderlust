@@ -94,7 +94,7 @@
     <% for(let listing of allListings){ %>
       <div class="col position-relative">
         
-        <!-- 1. Wishlist Heart Button Yahan Add Hua Hai -->
+        <!-- 1. Wishlist Heart Button -->
         <% if(currUser) { %>
           <button 
             type="button"
@@ -107,7 +107,13 @@
 
         <a href="/listings/<%=listing._id %>" class="listing-link">
           <div class="card col listing-card">
-            <img src="<%= (listing.image && listing.image.url) ? listing.image.url : listing.image %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
+            <!-- Multi-image array aur purane single-image dono ke liye fallback image -->
+            <img 
+              src="<%= (listing.images && listing.images.length > 0) ? listing.images[0].url : ((listing.image && listing.image.url) ? listing.image.url : (listing.image || '')) %>" 
+              class="card-img-top" 
+              alt="listing_image" 
+              style="height: 20rem; object-fit: cover;"
+            >
             <div class="card-img-overlay"></div>
             <div class="card-body">
               <p class="card-text">

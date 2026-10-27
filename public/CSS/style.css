@@ -48,6 +48,21 @@ body {
     font-size: 1.2rem;
 }
 
+.f-info-socials a.social-icon {
+  display: inline-block;
+  color: #222222;
+  font-size: 1.3rem;
+  margin: 0 0.6rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.f-info-socials a.social-icon:hover {
+  color: #fe424d;
+  transform: scale(1.15);
+}
+
 .f-info {
     text-align: center;
     height: 8rem;
